@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <!--加载外部配置文件-->
+    <properties resource="dbinfo.properties">
+        <!--<property name="name1" value="laowang"/>-->
+    </properties>
+
+    <!--setting配置-->
+    <settings>
+        <setting name="cacheEnabled" value="true"/>
+        <setting name="lazyLoadingEnabled" value="true"/>
+    </settings>
+    <!--配置别名: -->
+    <typeAliases>
+        <!--<typeAlias type="com.pojo.User" alias="User"></typeAlias>-->
+        <package name="com.pojo"/>
+    </typeAliases>
+
+
+    <!--默认加载环境1-->
+    <environments default="development">
+        <!--环境1:development-->
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.drive}"/>
+                <property name="url" value="${jdbc.url}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <!--mapper: 指定动态sql编写文件-->
+    <mappers>
+
+        <mapper resource="mappers/UserMapper.xml"></mapper>
+        <!--<mapper class=""></mapper>
+        <mapper url=""></mapper>
+        <package name=""></mapper>-->
+        <!-- 相对项目根目录 <mapper resource="mappers/GoodsDao.xml"></mapper>-->
+
+        <!-- 仅限接口和mapper在同一个位置中: <mapper class="com.dao.GoodsDao"></mapper>-->
+        <!-- 扫描包路径 <package name=""></package>-->
+        <!-- 完整资源路径 <mapper url=""></mapper>-->
+        <mapper resource="mappers/GoodsMapper.xml"></mapper>
+
+    </mappers>
+</configuration>

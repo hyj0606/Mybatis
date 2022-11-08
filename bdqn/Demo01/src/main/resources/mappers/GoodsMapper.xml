@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--   namespace： 需要标识唯一.(采用接口类型标识绑定)  -->
+<mapper namespace="com.dao.GoodsDao">
+
+    <!--sql语句的id要与接口内的方法名绑定:
+        sql语句的参数声明,返回值声明
+
+        动态参数绑定方式: ${} : 其实就是基础的参数拼接形式,有注入风险
+                       #{} : 占位符绑定参数形式，防止敏感参数注入
+    -->
+
+    <!--解析引用对象类型参数时,根据get,set属性解析-->
+    <insert id="addGoods" parameterType="Goods">
+        insert into tb_goods ( goods_name , goods_price)
+        values (#{goodsName} , #{goodsPrice});
+    </insert>
+
+    <select id="queryGoodsById" resultType="Goods">
+        select id, goods_name as goodsName, goods_price as goodsPrice
+        from tb_goods
+        <![CDATA[ where id < #{id} ]]>
+        order by id ${r1};
+    </select>
+
+    <delete id="delGoodsByIdList" parameterType="list">
+        delete
+        from tb_goods
+        where id in
+        <foreach collection="ids" item="id1" separator="," open="(" close=")">
+            #{id1}
+        </foreach>
+        ;
+    </delete>
+
+    <delete id="delGoodsByIds">
+        delete
+        from tb_goods
+        where id in (#{id1},#{id2})   ;
+    </delete>
+
+</mapper>

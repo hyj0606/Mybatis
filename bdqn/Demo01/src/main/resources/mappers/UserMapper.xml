@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--   namespace： 需要标识唯一.  -->
+<mapper namespace="com.dao.UserDao">
+
+    <!--   演示查询数据库:
+            封装结果:
+            User u1 = new User();
+            u1.id = id;
+            u1.account = account;
+            .....
+
+            如果sql模板中使用任何类型: 全部类名称首字母小写即可
+    -->
+    <select id="queryUserById" resultType="User">
+        select id , account , password , nick_name as nickName
+        from tb_user
+        where id = 4;
+    </select>
+
+    <!--
+        sql中的增删改
+    -->
+    <insert id="addUser">
+        insert into tb_user ( account, password, nick_name )
+        values ( 'sisi', '666' , '思思' );
+    </insert>
+
+    <update id="editUser">
+        update tb_user set account = 'nn'
+        where id = 4;
+    </update>
+
+    <delete id="delUser">
+        delete from tb_user
+        where id = 3;
+    </delete>
+
+    <!--定义映射规则-->
+    <resultMap id="RM_USER" type="User">
+        <id property="id" column="id"></id>
+        <result property="account" column="account"></result>
+        <result property="password" column="password"></result>
+        <result property="nickName" column="nick_name"></result>
+    </resultMap>
+
+    <select id="queryUserByPage" resultMap="RM_USER">
+        select id, account, password, nick_name
+        from tb_user
+        <trim prefix="where" prefixOverrides="and | or" suffixOverrides="and | or">
+            <if test="account != null">
+                account = #{account}
+            </if>
+            <if test="nickName != null">
+                and nick_name = #{nickName}
+            </if>
+            <if test="ids != null">
+                and id in
+                <foreach collection="ids" item="id1" open="(" close=")" separator=",">
+                    #{id1}
+                </foreach>
+            </if>
+        </trim>
+        limit #{m},#{n}
+    </select>
+
+</mapper>
