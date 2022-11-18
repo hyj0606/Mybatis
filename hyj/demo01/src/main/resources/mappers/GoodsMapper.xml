@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.GoodsDao">
+
+    <select id="queryGoodsById" resultType="Goods" parameterType="map">
+        select id , goods_name as goodsName, goods_price as goodsPrice , goods_type_id as type
+        from tb_goods
+        where id = 1;
+    </select>
+
+    <!--入参解析方式: #{id}: 占位符预编译形式("where id = ?") 注:防SQL注入,较为安全,查找绑定参数效率低,推荐绑定客户端参数
+                    ${id}: 字符串拼接形式("where id = " + id) 注: 当接受参数时,执行过程不安全,较为简单,仅支持较为安全的系统参数传入.
+     -->
+    <!-- 入参转义处理: <![CDATA[ id < ${id}]]> -->
+    <delete id="delGoods" parameterType="int">
+        delete from tb_goods
+        where
+              <![CDATA[ id < ${id}]]> ;
+    </delete>
+
+    <!-- 传入的两个参数,无法直接根据名称解析,因为默认将声明为: arg1, arg0, param1, param2-->
+    <select id="queryGoodsByIds" resultType="Goods">
+        select id , goods_name as goodsName, goods_price as goodsPrice , goods_type_id as type
+        from tb_goods
+        where id = #{id1} or id = #{id2}
+    </select>
+
+    <insert id="addGoods">
+        insert into tb_goods( goods_name , goods_price , goods_type_id )
+        values ( #{goodsName} , #{goodsPrice} , #{type} );
+    </insert>
+
+    <select id="queryGoodsByListIds" resultType="Goods">
+        select id , goods_name as goodsName, goods_price as goodsPrice , goods_type_id as type
+        from tb_goods
+        where id
+            <foreach collection="ids" item="id" separator="," open="in (" close=")">
+                #{id}
+            </foreach>
+    </select>
+
+    <!--体现出: 查询字段与实体类属性字段对应.-->
+    <resultMap id="RM_GOODS" type="Goods">
+        <id column="id" property="id"></id>
+        <result column="goods_name" property="goodsName"></result>
+        <result column="goods_price" property="goodsPrice"></result>
+        <result column="goods_type_id" property="type"></result>
+    </resultMap>
+    <select id="queryAllGoods" resultMap="RM_GOODS">
+        select id , goods_name , goods_price , goods_type_id
+        from tb_goods;
+    </select>
+
+</mapper>

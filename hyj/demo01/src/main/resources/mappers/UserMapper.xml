@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.UserDao">
+
+    <sql id="select_sql">
+        id , account ,
+        <choose>
+            <when test="password != null">
+                password
+            </when>
+            <otherwise>
+                '000000'
+            </otherwise>
+        </choose> ,
+        nick_name
+    </sql>
+
+    <sql id="where_sql">
+        <if test="id != 0 and id != null">
+            <![CDATA[id = #{id} ]]>
+        </if>
+        <if test="account != '' and account != null">
+            <![CDATA[ and account like #{account} ]]>
+        </if>
+        <if test="password != '' and password != null">
+            <![CDATA[ and password = #{password} ]]>
+        </if>
+    </sql>
+
+    <select id="selectUser" resultType="com.pojo.User">
+        select
+                <include refid="select_sql"></include>
+        from tb_user
+        <where>
+            <trim prefixOverrides="and | or" suffixOverrides="">
+                <include refid="where_sql"></include>
+            </trim>
+        </where>
+    </select>
+
+    <select id="selectUserByIds" resultType="User">
+        select
+        <include refid="select_sql"></include>
+        from tb_user
+
+            <foreach collection="ids" item="id" separator="," open="where id in (" close=")">
+                #{id}
+            </foreach>
+
+    </select>
+
+    <select id="selectAll" resultType="com.pojo.User">
+        select
+                <include refid="select_sql"></include>
+        from tb_user
+    </select>
+
+    <insert id="addUser">
+        insert into tb_user (account , password , nick_name) values ('xiaoer' , '123123', '二');
+    </insert>
+
+    <delete id="delUser" parameterType="User">
+        delete
+        from tb_user
+        where
+        <trim prefixOverrides="and | or">
+            <include refid="where_sql"></include>
+        </trim>
+    </delete>
+
+    <update id="editUser">
+        update tb_user set account = 'lisi'
+        where
+            <choose>
+                <when test="u1.id != 0 and u1.id != null">
+                    id = #{u1.id}
+                </when>
+                <otherwise>
+                    id = 0
+                </otherwise>
+            </choose>
+    </update>
+
+    <!--一对一关联查询-->
+
+    <!--方式一:-->
+    <resultMap id="RM_USER" type="User">
+        <id property="id" column="uid"></id>
+        <result property="account" column="uaccount"></result>
+        <result property="password" column="upassword"></result>
+
+        <association property="userDetail" javaType="UserDetail">
+            <id property="id" column="udid"></id>
+            <result property="address" column="udaddress"></result>
+            <result property="email" column="udemail"></result>
+            <result property="telphone" column="udtelphone"></result>
+        </association>
+    </resultMap>
+    <select id="queryUser" resultMap="RM_USER">
+        select
+            u.id uid, u.account uaccount, u.password upassword, u.nick_name unickName,
+            ud.id udid, ud.address udaddress, ud.email udemial, ud.telphone udtelphone
+        from tb_user u , tb_user_detail ud
+        where u.id = ud.uid
+              and u.id = #{id}
+    </select>
+
+    <!--方式二:-->
+    <resultMap id="RM_USER2" type="User">
+        <id property="id" column="id"></id>
+        <result property="account" column="account"></result>
+        <result property="password" column="password"></result>
+
+        <association property="userDetail" javaType="UserDetail" column="id" select="queryUserDetail">
+
+        </association>
+    </resultMap>
+    <select id="queryUser2" resultMap="RM_USER2">
+        select id,account, password
+        from tb_user
+        where id = #{id};
+    </select>
+    <!--自定义根据用户id查询用户的详细信息:-->
+    <select id="queryUserDetail" parameterType="int" resultType="UserDetail" >
+        select id, address, email, telphone
+        from tb_user_detail
+        where uid = #{uid};
+    </select>
+
+</mapper>

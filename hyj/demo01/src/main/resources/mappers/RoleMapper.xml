@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.RoleDao">
+
+    <!--一对一关联查询-->
+
+    <!--方式一:-->
+    <resultMap id="RM_ROLE" type="Role">
+        <!--先封装role属性: -->
+        <id property="id" column="rid"></id>
+        <result property="roleName" column="rolename"></result>
+
+        <!--再封装user集合属性:-->
+        <collection property="userList" javaType="list" ofType="User">
+            <id property="id" column="uid"></id>
+            <result column="uaccount" property="account"></result>
+            <result column="upassword" property="password"></result>
+            <result column="unickName" property="nick_name"></result>
+        </collection>
+    </resultMap>
+
+    <select id="queryRole" resultMap="RM_ROLE">
+        select
+            u.id uid, u.account uaccount, u.password upassword, u.nick_name unickName,
+            r.id rid, r.role_name rolename
+        from tb_user u , tb_role r , tb_user_role ur
+        where u.id = ur.uid and r.id = ur.rid
+              and r.id = #{id}
+    </select>
+
+
+    <!--方式二:-->
+    <resultMap id="RM_ROLE2" type="Role">
+        <id property="id" column="id"></id>
+        <result property="roleName" column="role_name"></result>
+
+        <collection property="userList" javaType="list" ofType="User" column="id" select="queryUserByRid"></collection>
+    </resultMap>
+    <select id="queryRole2" resultMap="RM_ROLE2">
+        select id, role_name
+        from tb_role
+        where id = #{id};
+    </select>
+    <!--自定义根据用户id查询用户的详细信息:-->
+    <select id="queryUserByRid" parameterType="int" resultType="User" >
+        select u.id id,u.account account, u.password password, u.nick_name nick_name
+        from tb_user u , tb_user_role ur
+        where u.id = ur.uid
+              and ur.rid = #{id};
+    </select>
+
+</mapper>
